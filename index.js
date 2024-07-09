@@ -58,11 +58,11 @@ const tools = [
                 "properties": {
                     "lat": {
                         "type": "string",
-                        "description": "lat",
+                        "description": "Latitude",
                     },
                     "long": {
                         "type": "string",
-                        "description": "long",
+                        "description": "Longitude",
                     }
                 },
                 "required": ["lat", "long"]
@@ -82,6 +82,15 @@ async function callOpenAI(userprompt, tools) {
             {
                 role: 'user',
                 content: `Based on the following prompt: "${userprompt}", choose the most appropriate function that should be triggered and provide only name and all the property as a object to invoke that function`
+            },
+            {
+                role: 'user',
+                content: `always give the output like this format: {
+                                                                        "name": "functionName",
+                                                                        "properties": {
+                                                                            "one or two property depending on function defination"
+                                                                        }
+                                                                    }`
             }
         ];
 
@@ -92,18 +101,28 @@ async function callOpenAI(userprompt, tools) {
             tool_choice: 'auto'
         });
 
-        //console.log('OpenAI Response:', response);
-
         // Check if choices exist and are not empty
         if (response.choices && response.choices.length > 0) {
             let chosenFunction = response.choices[0].message.content.trim();
+            
+            //console.log("Response: ",chosenFunction);
+            //chosenFunction = chosenFunction.replace(/```json|```/g, '');
+            // Extract function name and parameters from chosenFunction
+            let functionObj = JSON.parse(chosenFunction);
+            // Extract functionName and param
 
+            let functionName = functionObj.name;
             // Remove 'functions.' prefix if present
-            if (chosenFunction.startsWith('functions.')) {
-                chosenFunction = chosenFunction.replace('functions.', '');
-            }
+            if (functionName.startsWith('functions.')) {
+                functionName = functionName.replace('functions.', '');
+            } // "functions.getLocation"
+            
+            let param = functionObj.properties;
+            //console.log("Function Name:", functionName);
+            console.log("Param:", param);
+            
 
-            return chosenFunction;
+            return { functionName, param };
         } else {
             console.error('Empty response from OpenAI:', response);
             throw new Error('Empty response from OpenAI');
@@ -115,6 +134,25 @@ async function callOpenAI(userprompt, tools) {
     }
 }
 
+// Define functions to perform specific tasks
+async function getCurrentWeather(params) {
+    const { location } = params;
+    // Implement logic to get current weather using location
+    return `Current weather for ${location}: Sunny, 25°C`;
+}
+
+async function getTime(params) {
+    const { location } = params;
+    // Implement logic to get current time using location
+    return `Current time in ${location}: 12:00 PM`;
+}
+
+async function getLocation(params) {
+    const { lat, long } = params;
+    // Implement logic to get location using lat and long
+    return `User's location: Latitude ${lat}, Longitude ${long}`;
+}
+
 // Route to handle POST requests
 app.post('/decide-function', async (req, res) => {
     const { userprompt } = req.body;
@@ -124,12 +162,30 @@ app.post('/decide-function', async (req, res) => {
     }
 
     try {
-        const chosenFunction = await callOpenAI(userprompt, tools);
-        console.log('Chosen Function:', chosenFunction);
-        res.json({ function: chosenFunction });
+        const { functionName, param} = await callOpenAI(userprompt, tools);
+        console.log("Function name:", functionName);
+
+        // Dynamically call the appropriate function based on functionName
+        let result;
+        switch (functionName) {
+            case 'getCurrentWeather':
+                result = await getCurrentWeather(param);
+                break;
+            case 'getTime':
+                result = await getTime(param);
+                break;
+            case 'getLocation':
+                result = await getLocation(param);
+                break;
+            default:
+                throw new Error(`Unknown function name returned from OpenAI: ${functionName}`);
+        }
+
+        console.log('Function Result:', result);
+        res.json({ result });
     } catch (error) {
         console.error('Error:', error.message);
-        res.status(500).send({ error: 'Failed to get response from OpenAI API' });
+        res.status(500).send({ error: 'Failed to process request' });
     }
 });
 
