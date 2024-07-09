@@ -91,6 +91,14 @@ async function callOpenAI(userprompt, tools) {
                                                                             "one or two property depending on function defination"
                                                                         }
                                                                     }`
+            },
+            {
+                role: 'user',
+                content: 'if there is information about location then use that location to get the information about lat and long also.'
+            },
+            {
+                role: 'user',
+                content: 'if there is no information about location then use Dhaka as default location for testing purpose.But if user provide location then use that location to get the information about lat and long also.'
             }
         ];
 
