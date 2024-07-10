@@ -1,0 +1,16 @@
+<div class="container mt-4 bg-dark text-light p-4 rounded">
+  <div class="row mb-3">
+    <div class="col-md-8">
+      <input [(ngModel)]="prompt" name="prompt" class="form-control bg-secondary text-light border-light"
+             placeholder="Enter your prompt" (keyup.enter)="sendPrompt()" />
+    </div>
+    <div class="col-md-4">
+      <button (click)="sendPrompt()" class="btn btn-outline-light btn-block">Send</button>
+    </div>
+  </div>
+  <div class="row">
+    <div class="col">
+      <p class="alert alert-primary" *ngIf="response">{{ response }}</p>
+    </div>
+  </div>
+</div>

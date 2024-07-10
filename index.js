@@ -2,9 +2,11 @@ import express from 'express';
 import OpenAI from 'openai';
 import dotenv from 'dotenv';
 import axios from 'axios';
+import cors from 'cors';
 dotenv.config();
 
 const app = express();
+app.use(cors());
 app.use(express.json());
 
 const port = process.env.PORT || 3000;
@@ -25,7 +27,7 @@ const tools = [
                 "properties": {
                     "location": {
                         "type": "string",
-                        "description": "The city and state, e.g. San Francisco, CA",
+                        "description": "The city and state, e.g. Dhaka, BD",
                     }
                 },
                 "required": ["location"]
@@ -42,7 +44,7 @@ const tools = [
                 "properties": {
                     "location": {
                         "type": "string",
-                        "description": "The city and state, e.g. San Francisco, CA",
+                        "description": "The city and state, e.g. Dhaka, BD",
                     }
                 },
                 "required": ["location"]
@@ -103,7 +105,7 @@ async function callOpenAI(userprompt, tools) {
             },
             {
                 role: 'user',
-                content: 'if there is no information about location then use Dhaka as default location for testing purpose.But if user provide location then use that location to get the information about lat and long'
+                content: 'if there is no information about location then use Dhaka, BD as default location for testing purpose.But if user provide location then use that location to get the information about lat and long'
             }
         ];
 
@@ -132,7 +134,7 @@ async function callOpenAI(userprompt, tools) {
             
             let param = functionObj.properties;
             //console.log("Function Name:", functionName);
-            console.log("Param:", param);
+            //console.log("Param:", param);
             
 
             return { functionName, param };
@@ -166,7 +168,7 @@ async function getCurrentWeather(params) {
 
         return `Current weather in ${location}: ${description}, Temperature: ${temperature}°C`;
     } catch (error) {
-        console.error('Error fetching weather data:', error);
+        //console.error('Error fetching weather data:', error);
         throw new Error('Failed to get current weather');
     }
 }

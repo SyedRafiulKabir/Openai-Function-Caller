@@ -1,0 +1,30 @@
+.container {
+    max-width: 600px;
+    border: 1px solid #6c757d;
+  }
+  
+  .form-control {
+    margin-bottom: 10px;
+  }
+  
+  .btn-block {
+    width: 100%;
+  }
+  
+  .btn-outline-light {
+    border-color: #6c757d;
+    color: #f8f9fa;
+  }
+  
+  .btn-outline-light:hover {
+    background-color: #6c757d;
+    color: #fff;
+  }
+  
+  .alert-primary {
+    background-color: #0056b3;
+    border-color: #004085;
+    color: #fff;
+    font-weight: bold;
+  }
+  
